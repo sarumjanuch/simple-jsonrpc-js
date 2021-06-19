@@ -423,8 +423,11 @@ class JsonRpc {
         return Promise.all(promises);
     }
 
-    messageHandler(rawMessage, ...rest) {
+    messageHandler(message, ...rest) {
         try {
+            if (isObject(rawMessage)) {
+                return this.beforeResolve(rawMessage, ...rest);
+            }
             const message = JSON.parse(rawMessage);
             return this.beforeResolve(message, ...rest);
         } catch (e) {

@@ -167,6 +167,8 @@ class JsonRpc {
                     this.toStream(JSON.stringify(toStream), ...rest);
                 }
                 return result;
+            }).catch(e => {
+                this.toStream(JSON.stringify(e), ...rest)
             });
     }
 
@@ -382,10 +384,10 @@ class JsonRpc {
         this.dispatch.call(this, ...args);
     }
 
-    call(method, params) {
+    call(method, params, ...userData) {
         const _call = this._call(method, params);
         try {
-            this.toStream(JSON.stringify(_call.message));
+            this.toStream(JSON.stringify(_call.message),...userData);
         } catch (e) {
             this.rejectRequest({
                 "id":      _call.message.id,
@@ -396,8 +398,8 @@ class JsonRpc {
         return _call.promise;
     }
 
-    notify(method, params) {
-        this.toStream(JSON.stringify(this._notification(method, params)));
+    notify(method, params, appData) {
+        this.toStream(JSON.stringify(this._notification(method, params)), appData);
     }
 
     batch(requests) {
@@ -423,7 +425,7 @@ class JsonRpc {
         return Promise.all(promises);
     }
 
-    messageHandler(message, ...rest) {
+    messageHandler(rawMessage, ...rest) {
         try {
             if (isObject(rawMessage)) {
                 return this.beforeResolve(rawMessage, ...rest);
@@ -436,7 +438,7 @@ class JsonRpc {
                 "id":      null,
                 "jsonrpc": "2.0",
                 "error":   ERRORS.PARSE_ERROR
-            }));
+            }),...rest);
             return Promise.reject(e);
         }
     }

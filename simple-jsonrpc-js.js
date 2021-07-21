@@ -122,9 +122,9 @@ class JsonRpc {
     setError(jsonrpcError, exception) {
         let error = clone(jsonrpcError);
         if (!!exception) {
-            if (isObject(exception) && exception.hasOwnProperty("message")) {
-                error.data = exception.message;
-            } else if (isString(exception)) {
+            if (isObject(exception)) {
+                error.data = exception.data || exception.message || jsonrpcError.message;
+            }  else if (isString(exception)) {
                 error.data = exception;
             }
 
